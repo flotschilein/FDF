@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/08 15:56:44 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/09 14:51:42 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct s_camerainfo
 bool ft_fill_point(char *data, t_point *point, int x, int y)
 {
 	char **split;
+	char *color_str;
 
 	split = ft_split(data, ',');
 	if (!split)
@@ -53,7 +54,8 @@ bool ft_fill_point(char *data, t_point *point, int x, int y)
 		point->color = 0xFFFFFF;
 	else
 	{
-		point->color = ft_atoi_base(split[1], "0123456789ABCDEF");
+		color_str = split[1] + 2;
+		point->color = ft_atoi_base(ft_toupper(color_str), "0123456789ABCDEF");
 		if (point->color < 0)
 			point->color = 0xFFFFFF;
 	}
@@ -94,8 +96,13 @@ bool ft_fill_map(int fd,t_map *map)
 		map->points[y] = malloc(sizeof(t_point) * map->width);
 		if (!map->points[y])
 			return (free(line), true);
-		if(!map->points[y] || ft_fill_x(line, map->points[y], map->width, y))
-			return (free(line), true);
+		if(ft_fill_x(line, map->points[y], map->width, y))
+		{
+			free(line);
+			while (y > 0)
+			    free(map->points[--y]);
+			return (free(map->points),true);
+		}
 		free(line);
 		y++;
 	}
@@ -130,7 +137,6 @@ bool	validate_map(int fd[2], t_map *map)
 	{
 		close(fd[1]);
 		ft_putstr_fd("Error: Invalid map\n", 2);
-		free(map);
 		return (true);
 	}
 	return (false);
@@ -191,12 +197,14 @@ t_map *parse_map(char *filename)
 	t_map	*map;
 	bool	error;
 
+	if(!filename || !*filename)
+		return (ft_putstr_fd("Error: Invalid filename\n", 2), NULL);
 	if (open_fds(fd, filename))
 		return (NULL);
 	if (init_map_struct(&map))
 		return (close(fd[0]), close(fd[1]), NULL);
 	if (validate_map(fd, map))
-		return (NULL);
+		return (free(map), NULL);
 	error = ft_fill_map(fd[1], map);
 	close(fd[1]);
 	if (error)
