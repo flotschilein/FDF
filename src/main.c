@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/08 15:45:25 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/08 15:56:44 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ bool ft_fill_map(int fd,t_map *map)
 	int y;
 
 	y = 0;
-	map->points = malloc(sizeof(t_point *) * map->height)
+	map->points = malloc(sizeof(t_point *) * map->height);
 	if (!map->points)
 		return (true);
 	while ((line = get_next_line(fd)))
@@ -120,31 +120,88 @@ bool ft_map_size(int fd, t_map *map)
 	return (false);
 }
 
+bool	validate_map(int fd[2], t_map *map)
+{
+	bool	error;
+
+	error = ft_map_size(fd[0], map);
+	close(fd[0]);
+	if (map->width <= 0 || map->height <= 0 || error)
+	{
+		close(fd[1]);
+		ft_putstr_fd("Error: Invalid map\n", 2);
+		free(map);
+		return (true);
+	}
+	return (false);
+}
+
+bool	init_map_struct(t_map **map)
+{
+	*map = malloc(sizeof(t_map));
+	if (!*map)
+	{
+		ft_putstr_fd("Error: Allocation failed\n", 2);
+		return (true);
+	}
+	(*map)->width = 0;
+	(*map)->height = 0;
+	(*map)->points = NULL;
+	return (false);
+}
+
+bool open_fds(int fd[2], char *filename)
+{
+	fd[0] = open(filename, O_RDONLY);
+	fd[1] = open(filename, O_RDONLY);
+	if (fd[0] < 0 || fd[1] < 0)
+	{
+		if (fd[0] >= 0)
+			close(fd[0]);
+		if (fd[1] >= 0)
+			close(fd[1]);
+		ft_putstr_fd("Error: Could not open file\n", 2);
+		return (true);
+	}
+	return (false);
+}
+
+void	free_map(t_map *map)
+{
+	int	y;
+
+	if (!map)
+		return ;
+	if (map->points)
+	{
+		y = 0;
+		while (y < map->height)
+		{
+			free(map->points[y]);
+			y++;
+		}
+		free(map->points);
+	}
+	free(map);
+}
+
 t_map *parse_map(char *filename)
 {
-	int		fd1;
-	int		fd2;
+	int		fd[2];
 	t_map	*map;
 	bool	error;
 
-	error = false;
-	fd1 = open(filename, O_RDONLY);
-	fd2 = open(filename, O_RDONLY);
-	if (fd1 < 0 || fd2 < 0)
-		return (ft_putstr_fd("Error: Could not open file\n", 2) ,NULL);
-	map = malloc(sizeof(t_map));
-	if (!map)
-		return (ft_putstr_fd("Error: Allocation failed\n", 2), NULL);
-	map->width = 0;
-	map->height = 0;
-	map->points = NULL;
-	error = ft_map_size(fd, map);
-	if (map->width <= 0 || map->height <= 0 || error)
-		return (ft_putstr_fd("Error: Invalid map \n", 2), free(map), NULL);
-    error = ft_fill_map(fd, map);
-	if(error)
-		return(fd_putstr_fd("Error: Allocation failed\n", 2), NULL);
-	return (close(fd1), close(fd2),map);
+	if (open_fds(fd, filename))
+		return (NULL);
+	if (init_map_struct(&map))
+		return (close(fd[0]), close(fd[1]), NULL);
+	if (validate_map(fd, map))
+		return (NULL);
+	error = ft_fill_map(fd[1], map);
+	close(fd[1]);
+	if (error)
+		return (free_map(map), ft_putstr_fd("Map parse failed\n", 2), NULL);
+	return (map);
 }
 int main(int argc, char **argv)
 {
@@ -157,4 +214,5 @@ int main(int argc, char **argv)
 		return (ft_putstr_fd("Error: Could not parse map\n", 2), 1);
 	init_mlx(map);
 
+	return (0);
 }
