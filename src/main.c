@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/09 14:51:42 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/12 19:26:24 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ bool ft_fill_map(int fd,t_map *map)
 		if(ft_fill_x(line, map->points[y], map->width, y))
 		{
 			free(line);
+			free(map->points[y]);
 			while (y > 0)
 			    free(map->points[--y]);
 			return (free(map->points),true);
@@ -211,6 +212,12 @@ t_map *parse_map(char *filename)
 		return (free_map(map), ft_putstr_fd("Map parse failed\n", 2), NULL);
 	return (map);
 }
+
+void init_mlx (t_map *map)
+{
+
+}
+
 int main(int argc, char **argv)
 {
 	t_map		*map;
