@@ -6,12 +6,18 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/12 19:26:24 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/16 18:55:03 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "../includes/fdf.h"
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 typedef struct s_point
 {
     int x;
@@ -213,9 +219,33 @@ t_map *parse_map(char *filename)
 	return (map);
 }
 
-void init_mlx (t_map *map)
+void init_mlx(t_map *map)
 {
+    void *mlx;
+    void *win;
 
+    mlx = mlx_init();
+    if (!mlx)
+    {
+        ft_putstr_fd("Could not initialize MLX\n", 2);
+        free_map(map);
+        exit(1);
+    }
+    win = mlx_new_window(mlx, 1000, 1000, "FDF");
+    if (!win)
+    {
+        ft_putstr_fd("Could not create window\n", 2);
+        free_map(map);
+        exit(1);
+    }
+    mlx_hook(win, 17, 0, &close_window, mlx);
+    mlx_loop(mlx);
+}
+
+int close_window(void *mlx)
+{
+    mlx_destroy_window(mlx, mlx);
+    exit(0);
 }
 
 int main(int argc, char **argv)
