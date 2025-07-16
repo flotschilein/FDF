@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/16 18:55:03 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/16 19:43:06 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,28 +20,36 @@
 
 typedef struct s_point
 {
-    int x;
-    int y;
-    int z;
-    int color;
-} t_point;
+	int		x;
+	int		y;
+	int		z;
+	int		color;
+}	t_point;
 
 typedef struct s_map
 {
-    int         width;
-    int         height;
-    t_point     **points;
-} t_map;
+	int			width;
+	int			height;
+	t_point		**points;
+}	t_map;
 
 typedef struct s_camerainfo
 {
-    double      zoom;
-    double      angle_x;
-    double      angle_y;
-    double      angle_z;
-    int         offset_x;
-    int         offset_y;
-} t_camerainfo;
+	double		zoom;
+	double		angle_x;
+	double		angle_y;
+	double		angle_z;
+	int			offset_x;
+	int			offset_y;
+}	t_camerainfo;
+
+typedef struct s_data
+{
+	void			*mlx;
+	void			*win;
+	t_map			*map;
+	t_camerainfo	camera;
+}	t_data;
 
 bool ft_fill_point(char *data, t_point *point, int x, int y)
 {
@@ -219,32 +227,74 @@ t_map *parse_map(char *filename)
 	return (map);
 }
 
+int key_press(int keycode, t_data *data)
+{
+	if (keycode == 65307)
+		close_window(data);
+	else if (keycode == 65361)
+		data->camera.offset_x -= 10;
+	else if (keycode == 65363)
+		data->camera.offset_x += 10;
+	else if (keycode == 65362)
+		data->camera.offset_y -= 10;
+	else if (keycode == 65364)
+		data->camera.offset_y += 10;
+	else if (keycode == 61 && data->camera.zoom < 100)
+		data->camera.zoom *= 1.1;
+	else if (keycode == 45 && data->camera.zoom > 1)
+		data->camera.zoom *= 1.1;
+
+	mlx_clear_window(data->mlx, data->win);
+	draw_map(data);
+	return (0);
+}
+
+int close_window(t_data *data)
+{
+	mlx_destroy_window(data->mlx, data->win);
+	free_map(data->map);
+	exit(0);
+}
+
+void	init_camera(t_camerainfo *cam)
+{
+	cam->zoom = 20;
+	cam->angle_x = 0.523599;
+	cam->angle_y = 0.523599;
+	cam->angle_z = 0;
+	cam->offset_x = 500;
+	cam->offset_y = 500;
+}
+
 void init_mlx(t_map *map)
 {
-    void *mlx;
-    void *win;
+    t_data	data;
 
-    mlx = mlx_init();
-    if (!mlx)
-    {
-        ft_putstr_fd("Could not initialize MLX\n", 2);
-        free_map(map);
-        exit(1);
-    }
-    win = mlx_new_window(mlx, 1000, 1000, "FDF");
-    if (!win)
-    {
-        ft_putstr_fd("Could not create window\n", 2);
-        free_map(map);
-        exit(1);
-    }
-    mlx_hook(win, 17, 0, &close_window, mlx);
-    mlx_loop(mlx);
+	data->map = map;
+	data->mlx = mlx_init();
+	if (!data->mlx)
+	{
+		ft_putstr_fd("Could not initialize MLX\n", 2);
+		free_map(map);
+		exit(1);
+	}
+	data->win = mlx_new_window(data->mlx, 1000, 1000, "FDF");
+	if (!data->win)
+	{
+		ft_putstr_fd("Could not create window\n", 2);
+		free_map(map);
+		exit(1);
+	}
+	init_camera(&data->camera);
+	draw_map(&data);
+	mlx_hook(data->win, 2, 1L << 0, key_press, &data);
+	mlx_hook(data->win, 17, 0, close_window, &data);
+	mlx_loop(data->mlx);
 }
 
 int close_window(void *mlx)
 {
-    mlx_destroy_window(mlx, mlx);
+    mlx_destroy_window(mlx, win);
     exit(0);
 }
 
