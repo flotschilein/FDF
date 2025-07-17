@@ -6,12 +6,14 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/17 18:33:47 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/17 21:51:06 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "../includes/fdf.h"
+#include "MLX42/MLX42.h"
+#include <math.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -21,8 +23,6 @@
 bool ft_fill_point(char *data, t_point *point, int x, int y)
 {
 	char **split;
-	char *color_str;
-	char *str_upper;
 
 	split = ft_split(data, ',');
 	if (!split)
@@ -36,10 +36,7 @@ bool ft_fill_point(char *data, t_point *point, int x, int y)
 		point->color = 0xFFFFFF;
 	else
 	{
-		color_str = split[1] + 2;
-		while (*color_str != '\0')
-			*str_upper = ft_toupper(*color_str++);
-		point->color = ft_atoi_base(str_upper, "0123456789ABCDEF");
+		point->color = ft_atoi_base(split[1] + 2, "0123456789ABCDEF");
 		if (point->color < 0)
 			point->color = 0xFFFFFF;
 	}
@@ -197,14 +194,6 @@ t_map *parse_map(char *filename)
 	return (map);
 }
 
-typedef struct s_data
-{
-	void			*mlx;
-	void			*win;
-	t_map			*map;
-	t_camerainfo	camera;
-}	t_data;
-
 int	isometric_x(t_point p, t_camerainfo *cam)
 {
 	return (cos(cam->angle_x) * (p.x - p.y) * cam->zoom + cam->offset_x);
@@ -341,26 +330,26 @@ void init_mlx(t_map *map)
 {
     t_data	data;
 
-	data->map = map;
-	data->mlx = mlx_init();
-	if (!data->mlx)
+	data.map = map;
+	data.mlx = mlx_init();
+	if (!data.mlx)
 	{
 		ft_putstr_fd("Could not initialize MLX\n", 2);
 		free_map(map);
 		exit(1);
 	}
-	data->win = mlx_new_window(data->mlx, 1000, 1000, "FDF");
-	if (!data->win)
+	data.win = mlx_new_window(data.mlx, 1000, 1000, "FDF");
+	if (!data.win)
 	{
 		ft_putstr_fd("Could not create window\n", 2);
 		free_map(map);
 		exit(1);
 	}
-	init_camera(&data->camera);
+	init_camera(&data.camera);
 	draw_map(&data);
-	mlx_hook(data->win, 2, 1L << 0, key_press, &data);
-	mlx_hook(data->win, 17, 0, close_window, &data);
-	mlx_loop(data->mlx);
+	mlx_hook(data.win, 2, 1L << 0, key_press, &data);
+	mlx_hook(data.win, 17, 0, close_window, &data);
+	mlx_loop(data.mlx);
 }
 
 int main(int argc, char **argv)
