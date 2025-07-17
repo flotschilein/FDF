@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/16 19:43:06 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/17 18:33:47 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,43 +18,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-typedef struct s_point
-{
-	int		x;
-	int		y;
-	int		z;
-	int		color;
-}	t_point;
-
-typedef struct s_map
-{
-	int			width;
-	int			height;
-	t_point		**points;
-}	t_map;
-
-typedef struct s_camerainfo
-{
-	double		zoom;
-	double		angle_x;
-	double		angle_y;
-	double		angle_z;
-	int			offset_x;
-	int			offset_y;
-}	t_camerainfo;
-
-typedef struct s_data
-{
-	void			*mlx;
-	void			*win;
-	t_map			*map;
-	t_camerainfo	camera;
-}	t_data;
-
 bool ft_fill_point(char *data, t_point *point, int x, int y)
 {
 	char **split;
 	char *color_str;
+	char *str_upper;
 
 	split = ft_split(data, ',');
 	if (!split)
@@ -69,7 +37,9 @@ bool ft_fill_point(char *data, t_point *point, int x, int y)
 	else
 	{
 		color_str = split[1] + 2;
-		point->color = ft_atoi_base(ft_toupper(color_str), "0123456789ABCDEF");
+		while (*color_str != '\0')
+			*str_upper = ft_toupper(*color_str++);
+		point->color = ft_atoi_base(str_upper, "0123456789ABCDEF");
 		if (point->color < 0)
 			point->color = 0xFFFFFF;
 	}
@@ -227,6 +197,107 @@ t_map *parse_map(char *filename)
 	return (map);
 }
 
+typedef struct s_data
+{
+	void			*mlx;
+	void			*win;
+	t_map			*map;
+	t_camerainfo	camera;
+}	t_data;
+
+int	isometric_x(t_point p, t_camerainfo *cam)
+{
+	return (cos(cam->angle_x) * (p.x - p.y) * cam->zoom + cam->offset_x);
+}
+
+int	isometric_y(t_point p, t_camerainfo *cam)
+{
+	return (sin(cam->angle_y) * (p.x + p.y) * cam->zoom - p.z * cam->zoom + cam->offset_y);
+}
+
+void	draw_line(t_data *data, t_point a, t_point b)
+{
+	int dx = abs(b.x - a.x);
+	int dy = abs(b.y - a.y);
+	int sx = (a.x < b.x) ? 1 : -1;
+	int sy = (a.y < b.y) ? 1 : -1;
+	int err = dx - dy;
+	int e2;
+
+	while (1)
+	{
+		mlx_pixel_put(data->mlx, data->win, a.x, a.y, a.color);
+		if (a.x == b.x && a.y == b.y)
+			break;
+		e2 = 2 * err;
+		if (e2 > -dy) { err -= dy; a.x += sx; }
+		if (e2 < dx) { err += dx; a.y += sy; }
+	}
+}
+
+void draw_horizontal_lines(t_data *data, int y)
+{
+    int x;
+    t_point a, b;
+
+    x = 0;
+    while (x < data->map->width)
+    {
+        a = data->map->points[y][x];
+        a.x = isometric_x(a, &data->camera);
+        a.y = isometric_y(a, &data->camera);
+        if (x + 1 < data->map->width)
+        {
+            b = data->map->points[y][x + 1];
+            b.x = isometric_x(b, &data->camera);
+            b.y = isometric_y(b, &data->camera);
+            draw_line(data, a, b);
+        }
+        x++;
+    }
+}
+
+void draw_vertical_lines(t_data *data, int x)
+{
+    int y;
+    t_point a, b;
+
+    y = 0;
+    while (y < data->map->height)
+    {
+        a = data->map->points[y][x];
+        a.x = isometric_x(a, &data->camera);
+        a.y = isometric_y(a, &data->camera);
+        if (y + 1 < data->map->height)
+        {
+            b = data->map->points[y + 1][x];
+            b.x = isometric_x(b, &data->camera);
+            b.y = isometric_y(b, &data->camera);
+            draw_line(data, a, b);
+        }
+        y++;
+    }
+}
+
+void draw_map(t_data *data)
+{
+    int y;
+    int x;
+
+    y = 0;
+	x = 0;
+    while (y < data->map->height)
+    {
+        draw_horizontal_lines(data, y);
+        y++;
+    }
+    while (x < data->map->width)
+    {
+        draw_vertical_lines(data, x);
+        x++;
+    }
+}
+
 int key_press(int keycode, t_data *data)
 {
 	if (keycode == 65307)
@@ -242,7 +313,7 @@ int key_press(int keycode, t_data *data)
 	else if (keycode == 61 && data->camera.zoom < 100)
 		data->camera.zoom *= 1.1;
 	else if (keycode == 45 && data->camera.zoom > 1)
-		data->camera.zoom *= 1.1;
+		data->camera.zoom /= 1.1;
 
 	mlx_clear_window(data->mlx, data->win);
 	draw_map(data);
@@ -290,12 +361,6 @@ void init_mlx(t_map *map)
 	mlx_hook(data->win, 2, 1L << 0, key_press, &data);
 	mlx_hook(data->win, 17, 0, close_window, &data);
 	mlx_loop(data->mlx);
-}
-
-int close_window(void *mlx)
-{
-    mlx_destroy_window(mlx, win);
-    exit(0);
 }
 
 int main(int argc, char **argv)
