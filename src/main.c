@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/18 13:57:20 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/18 16:11:59 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,9 @@ typedef struct s_map
 typedef struct s_camerainfo
 {
 	double		zoom;
-	double		angle_x;
-	double		angle_y;
-	double		angle_z;
+	int			angle_z; // Not used in this example, but can be added for rotation
+	int 		angle_x;
+	int 		angle_y;
 	int			offset_x;
 	int			offset_y;
 }	t_camerainfo;
@@ -70,7 +70,9 @@ bool ft_fill_point(char *data, t_point *point, int x, int y)
 		point->color = 0xFFFFFFFF;
 	else
 	{
-		point->color = ft_atoi_base(split[1] + 2, "0123456789ABCDEF");
+		split[1][0] = 'F';
+		split[1][1] = 'F';
+		point->color = ft_atoi_base(split[1], "0123456789ABCDEF");
 		if (point->color < 0)
 			point->color = 0xFFFFFFFF;
 	}
@@ -230,14 +232,13 @@ t_map *parse_map(char *filename)
 
 int isometric_x(t_point p, t_camerainfo *cam)
 {
-    return ((p.x - p.y) * 0.866 * cam->zoom + cam->offset_x); // cos(30°) ≈ 0.866
+    return ((p.x - p.y) * cam->zoom + cam->offset_x);
 }
 
 int isometric_y(t_point p, t_camerainfo *cam)
 {
-    return (((p.x + p.y) * 0.5 - p.z) * cam->zoom + cam->offset_y); // sin(30°) = 0.5
+    return (((p.x + p.y) * 0.5 - p.z) * cam->zoom + cam->offset_y);
 }
-
 
 void	draw_line(t_data *data, t_point a, t_point b)
 {
@@ -359,14 +360,13 @@ int close_window(mlx_t *mlx)
 
 void	init_camera(t_camerainfo *cam)
 {
-	cam->zoom = 1;
-	cam->angle_x = 0.523599;
-	cam->angle_y = 0.523599;
+	cam->zoom = 10;
 	cam->angle_z = 0;
-	cam->offset_x = 400;
-	cam->offset_y = 200;
+	cam->angle_x = 0;
+	cam->angle_y = 0;
+	cam->offset_x = 500;
+	cam->offset_y = 0;
 }
-
 void init_mlx(t_map *map)
 {
     t_data	data;
