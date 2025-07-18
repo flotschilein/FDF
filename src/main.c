@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/18 13:34:37 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/18 13:57:20 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,12 +230,12 @@ t_map *parse_map(char *filename)
 
 int isometric_x(t_point p, t_camerainfo *cam)
 {
-    return ((p.x - p.y) * cos(M_PI / 6) * cam->zoom + cam->offset_x); // cos(30°) ≈ 0.866
+    return ((p.x - p.y) * 0.866 * cam->zoom + cam->offset_x); // cos(30°) ≈ 0.866
 }
 
 int isometric_y(t_point p, t_camerainfo *cam)
 {
-    return (((p.x + p.y) * sin(M_PI / 6) - p.z) * cam->zoom + cam->offset_y); // sin(30°) = 0.5
+    return (((p.x + p.y) * 0.5 - p.z) * cam->zoom + cam->offset_y); // sin(30°) = 0.5
 }
 
 
@@ -359,12 +359,12 @@ int close_window(mlx_t *mlx)
 
 void	init_camera(t_camerainfo *cam)
 {
-	cam->zoom = 10;
+	cam->zoom = 1;
 	cam->angle_x = 0.523599;
 	cam->angle_y = 0.523599;
 	cam->angle_z = 0;
-	cam->offset_x = 500;
-	cam->offset_y = 100;
+	cam->offset_x = 400;
+	cam->offset_y = 200;
 }
 
 void init_mlx(t_map *map)
