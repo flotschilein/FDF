@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/17 21:51:06 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/18 13:34:37 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+
+typedef struct s_point
+{
+	int		x;
+	int		y;
+	int		z;
+	long	color;
+}	t_point;
+
+typedef struct s_map
+{
+	int			width;
+	int			height;
+	t_point		**points;
+}	t_map;
+
+typedef struct s_camerainfo
+{
+	double		zoom;
+	double		angle_x;
+	double		angle_y;
+	double		angle_z;
+	int			offset_x;
+	int			offset_y;
+}	t_camerainfo;
+
+typedef struct s_data
+{
+	mlx_t           *mlx;
+	t_map           *map;
+	t_camerainfo    camera;
+	mlx_image_t     *img;
+}   t_data;
 
 bool ft_fill_point(char *data, t_point *point, int x, int y)
 {
@@ -33,12 +67,12 @@ bool ft_fill_point(char *data, t_point *point, int x, int y)
 	point->y = y;
 	point->z = ft_atoi(split[0]);
 	if (!split[1])
-		point->color = 0xFFFFFF;
+		point->color = 0xFFFFFFFF;
 	else
 	{
 		point->color = ft_atoi_base(split[1] + 2, "0123456789ABCDEF");
 		if (point->color < 0)
-			point->color = 0xFFFFFF;
+			point->color = 0xFFFFFFFF;
 	}
 	ft_free_split(split);
 	return (false);
@@ -194,15 +228,16 @@ t_map *parse_map(char *filename)
 	return (map);
 }
 
-int	isometric_x(t_point p, t_camerainfo *cam)
+int isometric_x(t_point p, t_camerainfo *cam)
 {
-	return (cos(cam->angle_x) * (p.x - p.y) * cam->zoom + cam->offset_x);
+    return ((p.x - p.y) * cos(M_PI / 6) * cam->zoom + cam->offset_x); // cos(30°) ≈ 0.866
 }
 
-int	isometric_y(t_point p, t_camerainfo *cam)
+int isometric_y(t_point p, t_camerainfo *cam)
 {
-	return (sin(cam->angle_y) * (p.x + p.y) * cam->zoom - p.z * cam->zoom + cam->offset_y);
+    return (((p.x + p.y) * sin(M_PI / 6) - p.z) * cam->zoom + cam->offset_y); // sin(30°) = 0.5
 }
+
 
 void	draw_line(t_data *data, t_point a, t_point b)
 {
@@ -215,7 +250,8 @@ void	draw_line(t_data *data, t_point a, t_point b)
 
 	while (1)
 	{
-		mlx_pixel_put(data->mlx, data->win, a.x, a.y, a.color);
+		if (a.x >= 0 && a.x < (int)data->img->width && a.y >= 0 && a.y < (int)data->img->height)
+			mlx_put_pixel(data->img, a.x, a.y, a.color);
 		if (a.x == b.x && a.y == b.y)
 			break;
 		e2 = 2 * err;
@@ -287,43 +323,48 @@ void draw_map(t_data *data)
     }
 }
 
-int key_press(int keycode, t_data *data)
+void clear_image(mlx_image_t *img)
 {
-	if (keycode == 65307)
-		close_window(data);
-	else if (keycode == 65361)
-		data->camera.offset_x -= 10;
-	else if (keycode == 65363)
-		data->camera.offset_x += 10;
-	else if (keycode == 65362)
-		data->camera.offset_y -= 10;
-	else if (keycode == 65364)
-		data->camera.offset_y += 10;
-	else if (keycode == 61 && data->camera.zoom < 100)
-		data->camera.zoom *= 1.1;
-	else if (keycode == 45 && data->camera.zoom > 1)
-		data->camera.zoom /= 1.1;
-
-	mlx_clear_window(data->mlx, data->win);
-	draw_map(data);
-	return (0);
+    ft_bzero(img->pixels, img->width * img->height * 4);
 }
 
-int close_window(t_data *data)
+void key_press(mlx_key_data_t keydata, void *param)
 {
-	mlx_destroy_window(data->mlx, data->win);
-	free_map(data->map);
+	t_data *data = (t_data *)param;
+
+	if (keydata.key == MLX_KEY_ESCAPE && keydata.action == MLX_PRESS)
+		mlx_close_window(data->mlx);
+	else if (keydata.key == MLX_KEY_LEFT)
+		data->camera.offset_x -= 10;
+	else if (keydata.key == MLX_KEY_RIGHT)
+		data->camera.offset_x += 10;
+	else if (keydata.key == MLX_KEY_UP)
+		data->camera.offset_y -= 10;
+	else if (keydata.key == MLX_KEY_DOWN)
+		data->camera.offset_y += 10;
+	else if (keydata.key == MLX_KEY_KP_ADD && data->camera.zoom < 100)
+		data->camera.zoom *= 1.1;
+	else if (keydata.key == MLX_KEY_KP_SUBTRACT && data->camera.zoom > 1)
+		data->camera.zoom /= 1.1;
+
+	clear_image(data->img);
+	draw_map(data);
+}
+
+int close_window(mlx_t *mlx)
+{
+	mlx_close_window(mlx);
 	exit(0);
 }
 
 void	init_camera(t_camerainfo *cam)
 {
-	cam->zoom = 20;
+	cam->zoom = 10;
 	cam->angle_x = 0.523599;
 	cam->angle_y = 0.523599;
 	cam->angle_z = 0;
 	cam->offset_x = 500;
-	cam->offset_y = 500;
+	cam->offset_y = 100;
 }
 
 void init_mlx(t_map *map)
@@ -331,24 +372,24 @@ void init_mlx(t_map *map)
     t_data	data;
 
 	data.map = map;
-	data.mlx = mlx_init();
+	data.mlx = mlx_init(1000, 1000, "FDF", false);
 	if (!data.mlx)
 	{
 		ft_putstr_fd("Could not initialize MLX\n", 2);
 		free_map(map);
 		exit(1);
 	}
-	data.win = mlx_new_window(data.mlx, 1000, 1000, "FDF");
-	if (!data.win)
+	data.img = mlx_new_image(data.mlx, 1000, 1000);
+	if (!data.img)
 	{
-		ft_putstr_fd("Could not create window\n", 2);
+		ft_putstr_fd("Could not create image\n", 2);
 		free_map(map);
 		exit(1);
 	}
+	mlx_image_to_window(data.mlx, data.img, 0, 0);
 	init_camera(&data.camera);
 	draw_map(&data);
-	mlx_hook(data.win, 2, 1L << 0, key_press, &data);
-	mlx_hook(data.win, 17, 0, close_window, &data);
+	mlx_key_hook(data.mlx, &key_press, &data);
 	mlx_loop(data.mlx);
 }
 
