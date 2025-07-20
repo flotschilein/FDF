@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/20 21:50:10 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/20 23:00:07 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ typedef struct s_map
 {
 	int				width;
 	int				height;
-	s_point_in		**points_in;
+	t_point_in		**points_in;
 	t_point_render	**points_render;
 }	t_map;
 
@@ -73,11 +73,11 @@ bool	calc_map_size(int *width, int *height, char *filename)
 		split = ft_split(line, ' ');
 		if (!split)
 			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), false);
-		if (ft_arraylen(split) == 0)
+		if (ft_arr_len(split) == 0)
 			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), ft_free_split(split), false);
 		if (*width == 0)
-			*width = ft_arraylen(split);
-		else if (ft_arraylen(split) != *width)
+			*width = ft_arr_len(split);
+		else if (ft_arr_len(split) != *width)
 			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), ft_free_split(split), false);
 		free(line);
 		ft_free_split(split);
@@ -178,8 +178,6 @@ bool	fill_val(int fd, t_map *map)
 bool	read_map_points(t_map *map, char *filename)
 {
 	int fd;
-	char *line;
-	char **split;
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0)
@@ -194,29 +192,8 @@ bool	read_map_points(t_map *map, char *filename)
 	close(fd);
 	return (true);
 }
-bool	allocate_map_render(t_map *map, int width, int height)
-{
-	int y;
 
-	map->points_render = malloc(sizeof(t_point_render *) * height);
-	if (!map->points_render)
-		return (false);
-	y = 0;
-	while (y < height)
-	{
-		map->points_render[y] = malloc(sizeof(t_point_render) * width);
-		if (!map->points_render[y])
-		{
-			while (--y >= 0)
-				free(map->points_render[y]);
-			free(map->points_render);
-			return (false);
-		}
-		y++;
-	}
-	return (true);
-}
-void	project_to_2d(t_map *map, int x, int y)
+void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 {
 	double	angle;
 	double	iso_x;
@@ -228,14 +205,28 @@ void	project_to_2d(t_map *map, int x, int y)
 	iso_x = (x - y) * cos(angle);
 	iso_y = (x + y) * sin(angle) - map->points_in[y][x].z;
 
-	scaled_x = iso_x * map->camera.zoom + map->camera.offset_x;
-	scaled_y = iso_y * map->camera.zoom + map->camera.offset_y;
+	scaled_x = iso_x * cam->zoom + cam->offset_x;
+	scaled_y = iso_y * cam->zoom + cam->offset_y;
 
 	map->points_render[y][x].x = (int)scaled_x;
 	map->points_render[y][x].y = (int)scaled_y;
 }
 
-bool	calc_render_points(t_map *map)
+// void print_render_points(t_map *map)
+// {
+//     printf("\n--- Rendered Points (2D Isometric Projection) ---\n");
+//     for (int y = 0; y < map->height; y++)
+//     {
+//         for (int x = 0; x < map->width; x++)
+//         {
+//             printf("(%4d, %4d) ", map->points_render[y][x].x, map->points_render[y][x].y);
+//         }
+//         printf("\n");
+//     }
+//     printf("\n");
+// }
+
+bool	calc_render_points(t_map *map, t_camerainfo *cam)
 {
 	int y;
 	int x;
@@ -251,20 +242,21 @@ bool	calc_render_points(t_map *map)
 		x = 0;
 		while (x < map->width)
 		{
-			project_to_2d(map, x, y);
+			project_to_2d(map, x, y, cam);
 			x++;
 		}
 		y++;
 	}
 	return (true);
 }
-bool	init_map(t_map *map, char *filename)
+
+bool	init_map(t_map *map, char *filename,t_camerainfo *cam)
 {
-	if (!calc_map_size(map->width, map->height, filename))
+	if (!calc_map_size(&map->width, &map->height, filename))
 		return (false);
 	if (!read_map_points(map, filename))
 		return (false);
-	if (!calc_render_points(map))
+	if (!calc_render_points(map, cam))
 	{
 		free_points_in(map);
 		return (false);
@@ -272,7 +264,7 @@ bool	init_map(t_map *map, char *filename)
 	return (true);
 }
 
-bool	init_mlx(mlx_t *mlx).
+bool	init_mlx(mlx_t *mlx)
 {
 	mlx = mlx_init(1000, 1000, "FDF", false);
 	if (!mlx)
@@ -282,18 +274,21 @@ bool	init_mlx(mlx_t *mlx).
 
 void	init_camera(t_camerainfo *camera)
 {
-	camera->zoom = 1.0;
+	camera->zoom = 100;
 	camera->offset_x = 0;
 	camera->offset_y = 0;
 }
 
 bool	init_all(t_data *data, char *filename)
 {
+	data->map = malloc(sizeof(t_map));
+	if (!data->map)
+		return (ft_putstr_fd("Memory allocation failed\n", 2), false);
+	init_camera(&data->camera);
 	if(!init_mlx(data->mlx))
 		return (false);
-	if(!init_map(data->map, filename))
+	if(!init_map(data->map, filename, &data->camera))
 		return (false);
-	init_camera(data->camera)
 	if(!init_image(data->img, data->mlx))
 		return (false);
 	return (true);

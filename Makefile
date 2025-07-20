@@ -6,7 +6,7 @@
 #    By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/03 13:50:27 by fbraune           #+#    #+#              #
-#    Updated: 2025/07/04 20:28:05 by fbraune          ###   ########.fr        #
+#    Updated: 2025/07/20 22:41:24 by fbraune          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,7 @@ MLX42_LIB = $(MLX42_DIR)build/libmlx42.a
 all: clone_mlx42 $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT) $(MLX42_LIB)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(MLX42_LIB) -o $(NAME) -lglfw -framework Cocoa -framework OpenGL -framework IOKit
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(MLX42_LIB) -o $(NAME) -fsanitize=address -g -lglfw -framework Cocoa -framework OpenGL -framework IOKit
 
 $(LIBFT):
 	make -C $(LIBFT_DIR)
