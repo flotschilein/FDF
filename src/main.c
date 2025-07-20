@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/20 16:53:32 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/20 19:22:51 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,50 @@ typedef struct s_data
 	mlx_image_t     *img;
 }   t_data;
 
-int main(int argc, char **argv)
+bool	calc_map_size(int *width, int *height, char *filename)
 {
+	int fd;
 
+}
+
+bool	init_map(t_map *map, char *filename)
+{
+	if (!calc_map_size(map->width, map->height, filename))
+		return (false);
+}
+
+bool	init_mlx(mlx_t *mlx)
+{
+	mlx = mlx_init(1000, 1000, "FDF", false);
+	if (!mlx)
+		return (false);
+	return (true);
+}
+
+bool	init_all(t_data *data, char *filename)
+{
+	if(!init_mlx(data->mlx))
+		return (false);
+	if(!init_map(data->map, filename))
+		return (false);
+	if(!init_camera(data->camera))
+		return (false);
+	if(!init_image(data->img, data->mlx))
+		return (false);
+	return (true);
+}
+
+
+int main(int ac, char **av)
+{
+	t_data	*data;
+
+	if (ac != 2)
+		return (ft_putstr_fd("Usage ./fdf <location and name>\n", 2), 1);
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (ft_putstr_fd("Memory allocation failed\n", 2), 1);
+	if(!init_all(data, av[1]))
+		return (ft_putstr_fd("Initialization failed\n", 2), free(data), 1);
 	return (0);
 }
