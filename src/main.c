@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/18 16:11:59 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/20 16:09:26 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ typedef struct s_point
 	int		x;
 	int		y;
 	int		z;
-	long	color;
+	size_t	color;
 }	t_point;
 
 typedef struct s_map
@@ -230,98 +230,9 @@ t_map *parse_map(char *filename)
 	return (map);
 }
 
-int isometric_x(t_point p, t_camerainfo *cam)
-{
-    return ((p.x - p.y) * cam->zoom + cam->offset_x);
-}
-
-int isometric_y(t_point p, t_camerainfo *cam)
-{
-    return (((p.x + p.y) * 0.5 - p.z) * cam->zoom + cam->offset_y);
-}
-
-void	draw_line(t_data *data, t_point a, t_point b)
-{
-	int dx = abs(b.x - a.x);
-	int dy = abs(b.y - a.y);
-	int sx = (a.x < b.x) ? 1 : -1;
-	int sy = (a.y < b.y) ? 1 : -1;
-	int err = dx - dy;
-	int e2;
-
-	while (1)
-	{
-		if (a.x >= 0 && a.x < (int)data->img->width && a.y >= 0 && a.y < (int)data->img->height)
-			mlx_put_pixel(data->img, a.x, a.y, a.color);
-		if (a.x == b.x && a.y == b.y)
-			break;
-		e2 = 2 * err;
-		if (e2 > -dy) { err -= dy; a.x += sx; }
-		if (e2 < dx) { err += dx; a.y += sy; }
-	}
-}
-
-void draw_horizontal_lines(t_data *data, int y)
-{
-    int x;
-    t_point a, b;
-
-    x = 0;
-    while (x < data->map->width)
-    {
-        a = data->map->points[y][x];
-        a.x = isometric_x(a, &data->camera);
-        a.y = isometric_y(a, &data->camera);
-        if (x + 1 < data->map->width)
-        {
-            b = data->map->points[y][x + 1];
-            b.x = isometric_x(b, &data->camera);
-            b.y = isometric_y(b, &data->camera);
-            draw_line(data, a, b);
-        }
-        x++;
-    }
-}
-
-void draw_vertical_lines(t_data *data, int x)
-{
-    int y;
-    t_point a, b;
-
-    y = 0;
-    while (y < data->map->height)
-    {
-        a = data->map->points[y][x];
-        a.x = isometric_x(a, &data->camera);
-        a.y = isometric_y(a, &data->camera);
-        if (y + 1 < data->map->height)
-        {
-            b = data->map->points[y + 1][x];
-            b.x = isometric_x(b, &data->camera);
-            b.y = isometric_y(b, &data->camera);
-            draw_line(data, a, b);
-        }
-        y++;
-    }
-}
-
 void draw_map(t_data *data)
 {
-    int y;
-    int x;
 
-    y = 0;
-	x = 0;
-    while (y < data->map->height)
-    {
-        draw_horizontal_lines(data, y);
-        y++;
-    }
-    while (x < data->map->width)
-    {
-        draw_vertical_lines(data, x);
-        x++;
-    }
 }
 
 void clear_image(mlx_image_t *img)
@@ -360,12 +271,12 @@ int close_window(mlx_t *mlx)
 
 void	init_camera(t_camerainfo *cam)
 {
-	cam->zoom = 10;
+	cam->zoom = 1;
 	cam->angle_z = 0;
-	cam->angle_x = 0;
-	cam->angle_y = 0;
+	cam->angle_x = 30;
+	cam->angle_y = 30;
 	cam->offset_x = 500;
-	cam->offset_y = 0;
+	cam->offset_y = 300;
 }
 void init_mlx(t_map *map)
 {
