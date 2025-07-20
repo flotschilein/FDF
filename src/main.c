@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/20 20:33:45 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/20 20:58:47 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ typedef struct s_point_in
 
 typedef struct s_point_render
 {
-	int		x;
-	int		y;
+	double	x;
+	double	y;
 }	t_point_render;
 
 typedef struct s_map
@@ -194,20 +194,38 @@ bool	read_map_points(t_map *map, char *filename)
 	close(fd);
 	return (true);
 }
+
+bool	calc_render_points(t_map *map)
+{
+
+}
 bool	init_map(t_map *map, char *filename)
 {
 	if (!calc_map_size(map->width, map->height, filename))
 		return (false);
 	if (!read_map_points(map, filename))
 		return (false);
+	if (!calc_render_points(map))
+	{
+		free_points_in(map);
+		return (false);
+	}
+	return (true);
 }
 
-bool	init_mlx(mlx_t *mlx)
+bool	init_mlx(mlx_t *mlx).
 {
 	mlx = mlx_init(1000, 1000, "FDF", false);
 	if (!mlx)
 		return (false);
 	return (true);
+}
+
+void	init_camera(t_camerainfo *camera)
+{
+	camera->zoom = 1.0;
+	camera->offset_x = 0;
+	camera->offset_y = 0;
 }
 
 bool	init_all(t_data *data, char *filename)
@@ -216,8 +234,7 @@ bool	init_all(t_data *data, char *filename)
 		return (false);
 	if(!init_map(data->map, filename))
 		return (false);
-	if(!init_camera(data->camera))
-		return (false);
+	init_camera(data->camera)
 	if(!init_image(data->img, data->mlx))
 		return (false);
 	return (true);
