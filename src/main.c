@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/20 19:22:51 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/20 20:05:22 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,12 +60,53 @@ typedef struct s_data
 bool	calc_map_size(int *width, int *height, char *filename)
 {
 	int fd;
+	char *line;
+	char **split;
 
+	*width = 0;
+	*height = 0;
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		return (ft_putstr_fd("Error calc\n", 2), false);
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		split = ft_split(line, ' ');
+		if (!split)
+			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), false);
+		if (ft_arraylen(split) == 0)
+			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), ft_free_split(split), false);
+		if (*width == 0)
+			*width = ft_arraylen(split);
+		else if (ft_arraylen(split) != *width)
+			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), ft_free_split(split), false);
+		free(line);
+		ft_free_split(split);
+		(*height)++;
+	}
+	return (close(fd), *width > 0 && *height > 0);
 }
 
+bool
+
+bool	read_map_points(t_map *map, char *filename)
+{
+	int fd;
+	char *line;
+	char **split;
+	int		y;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		return (ft_putstr_fd("Error read\n", 2), false);
+	if (!allocate_map(map, map->width, map->height))
+		return (close(fd), ft_putstr_fd("Error read\n", 2), false);
+
+}
 bool	init_map(t_map *map, char *filename)
 {
 	if (!calc_map_size(map->width, map->height, filename))
+		return (false);
+	if (!read_map_points(map, filename))
 		return (false);
 }
 
