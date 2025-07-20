@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/20 20:58:47 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/20 21:50:10 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ typedef struct s_point_in
 
 typedef struct s_point_render
 {
-	double	x;
-	double	y;
+	int		x;
+	int		y;
 }	t_point_render;
 
 typedef struct s_map
@@ -194,10 +194,69 @@ bool	read_map_points(t_map *map, char *filename)
 	close(fd);
 	return (true);
 }
+bool	allocate_map_render(t_map *map, int width, int height)
+{
+	int y;
+
+	map->points_render = malloc(sizeof(t_point_render *) * height);
+	if (!map->points_render)
+		return (false);
+	y = 0;
+	while (y < height)
+	{
+		map->points_render[y] = malloc(sizeof(t_point_render) * width);
+		if (!map->points_render[y])
+		{
+			while (--y >= 0)
+				free(map->points_render[y]);
+			free(map->points_render);
+			return (false);
+		}
+		y++;
+	}
+	return (true);
+}
+void	project_to_2d(t_map *map, int x, int y)
+{
+	double	angle;
+	double	iso_x;
+	double	iso_y;
+	double	scaled_x;
+	double	scaled_y;
+
+	angle = M_PI / 6;
+	iso_x = (x - y) * cos(angle);
+	iso_y = (x + y) * sin(angle) - map->points_in[y][x].z;
+
+	scaled_x = iso_x * map->camera.zoom + map->camera.offset_x;
+	scaled_y = iso_y * map->camera.zoom + map->camera.offset_y;
+
+	map->points_render[y][x].x = (int)scaled_x;
+	map->points_render[y][x].y = (int)scaled_y;
+}
 
 bool	calc_render_points(t_map *map)
 {
+	int y;
+	int x;
 
+	if (!allocate_map_render(map, map->width, map->height))
+	{
+		free_points_in(map);
+		return (false);
+	}
+	y = 0;
+	while (y < map->height)
+	{
+		x = 0;
+		while (x < map->width)
+		{
+			project_to_2d(map, x, y);
+			x++;
+		}
+		y++;
+	}
+	return (true);
 }
 bool	init_map(t_map *map, char *filename)
 {
