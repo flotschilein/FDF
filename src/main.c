@@ -6,33 +6,32 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/21 19:48:28 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/21 20:23:54 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../libft/libft.h"
 #include "../includes/fdf.h"
+#include "../libft/libft.h"
 #include "MLX42/MLX42.h"
-#include <math.h>
 #include <fcntl.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-
 typedef struct s_point_in
 {
-	int		x;
-	int		y;
-	int		z;
-}	t_point_in;
+	int				x;
+	int				y;
+	int				z;
+}					t_point_in;
 
 typedef struct s_point_render
 {
-	int		x;
-	int		y;
-}	t_point_render;
+	int				x;
+	int				y;
+}					t_point_render;
 
 typedef struct s_map
 {
@@ -40,28 +39,28 @@ typedef struct s_map
 	int				height;
 	t_point_in		**points_in;
 	t_point_render	**points_render;
-}	t_map;
+}					t_map;
 
 typedef struct s_camerainfo
 {
-	double		zoom;
-	int			offset_x;
-	int			offset_y;
-}	t_camerainfo;
+	double			zoom;
+	int				offset_x;
+	int				offset_y;
+}					t_camerainfo;
 
 typedef struct s_data
 {
-	mlx_t           *mlx;
-	t_map           *map;
-	t_camerainfo    camera;
-	mlx_image_t     *img;
-}   t_data;
+	mlx_t			*mlx;
+	t_map			*map;
+	t_camerainfo	camera;
+	mlx_image_t		*img;
+}					t_data;
 
 bool	calc_map_size(int *width, int *height, char *filename)
 {
-	int fd;
-	char *line;
-	char **split;
+	int		fd;
+	char	*line;
+	char	**split;
 
 	*width = 0;
 	*height = 0;
@@ -72,26 +71,43 @@ bool	calc_map_size(int *width, int *height, char *filename)
 	{
 		split = ft_split(line, ' ');
 		if (!split)
-			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), false);
+			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line),
+				false);
 		if (ft_arr_len(split) == 0)
-			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), ft_free_split(split), false);
+			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line),
+				ft_free_split(split), false);
 		if (*width == 0)
 			*width = ft_arr_len(split);
 		else if (ft_arr_len(split) != *width)
-			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line), ft_free_split(split), false);
+			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line),
+				ft_free_split(split), false);
 		free(line);
 		ft_free_split(split);
 		(*height)++;
 	}
 	return (close(fd), *width > 0 && *height > 0);
 }
+void	free_points_render(t_map *map)
+{
+	int	y;
 
+	if (!map->points_render)
+		return ;
+	y = 0;
+	while (y < map->height)
+	{
+		free(map->points_render[y]);
+		y++;
+	}
+	free(map->points_render);
+	map->points_render = NULL;
+}
 void	free_points_in(t_map *map)
 {
-	int y;
+	int	y;
 
 	if (!map->points_in)
-		return;
+		return ;
 	y = 0;
 	while (y < map->height)
 	{
@@ -104,7 +120,7 @@ void	free_points_in(t_map *map)
 
 bool	allocate_map_render(t_map *map, int width, int height)
 {
-	int y;
+	int	y;
 
 	map->points_render = malloc(sizeof(t_point_render *) * height);
 	if (!map->points_render)
@@ -127,7 +143,7 @@ bool	allocate_map_render(t_map *map, int width, int height)
 
 bool	allocate_map_in(t_map *map, int width, int height)
 {
-	int y;
+	int	y;
 
 	map->points_in = malloc(sizeof(t_point_in *) * height);
 	if (!map->points_in)
@@ -177,7 +193,7 @@ bool	fill_val(int fd, t_map *map)
 
 bool	read_map_points(t_map *map, char *filename)
 {
-	int fd;
+	int	fd;
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0)
@@ -204,10 +220,8 @@ void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 	angle = M_PI / 6;
 	iso_x = (x - y) * cos(angle);
 	iso_y = (x + y) * sin(angle) - map->points_in[y][x].z;
-
 	scaled_x = iso_x * cam->zoom + cam->offset_x;
 	scaled_y = iso_y * cam->zoom + cam->offset_y;
-
 	map->points_render[y][x].x = round(scaled_x);
 	map->points_render[y][x].y = round(scaled_y);
 }
@@ -219,7 +233,8 @@ void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 //     {
 //         for (int x = 0; x < map->width; x++)
 //         {
-//             printf("(%4d, %4d) ", map->points_render[y][x].x, map->points_render[y][x].y);
+//             printf("(%4d, %4d) ", map->points_render[y][x].x,
+	map->points_render[y][x].y);
 //         }
 //         printf("\n");
 //     }
@@ -228,8 +243,8 @@ void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 
 bool	calc_render_points(t_map *map, t_camerainfo *cam)
 {
-	int y;
-	int x;
+	int	y;
+	int	x;
 
 	if (!allocate_map_render(map, map->width, map->height))
 	{
@@ -250,7 +265,7 @@ bool	calc_render_points(t_map *map, t_camerainfo *cam)
 	return (true);
 }
 
-bool	init_map(t_map *map, char *filename,t_camerainfo *cam)
+bool	init_map(t_map *map, char *filename, t_camerainfo *cam)
 {
 	if (!calc_map_size(&map->width, &map->height, filename))
 		return (false);
@@ -267,16 +282,16 @@ bool	init_map(t_map *map, char *filename,t_camerainfo *cam)
 bool	init_mlx(t_data *data)
 {
 	data->mlx = mlx_init(1000, 1000, "FDF", false);
-    if (!data->mlx)
-        return false;
-    return true;
+	if (!data->mlx)
+		return (false);
+	return (true);
 }
 
 void	init_camera(t_camerainfo *camera)
 {
-	camera->zoom = 40;
-	camera->offset_x = 0;
-	camera->offset_y = 0;
+	camera->zoom = 1;
+	camera->offset_x = 500;
+	camera->offset_y = 500;
 }
 bool	init_image(mlx_image_t **img, mlx_t *mlx)
 {
@@ -287,7 +302,7 @@ bool	init_image(mlx_image_t **img, mlx_t *mlx)
 	return (true);
 }
 
-int    ft_abs(int value)
+int	ft_abs(int value)
 {
 	if (value < 0)
 		return (-value);
@@ -301,16 +316,15 @@ void	put_pixel_safe(mlx_image_t *img, int x, int y)
 }
 void	draw_line_low(t_data *data, t_point_render a, t_point_render b)
 {
-	int		dx;
-	int		dy;
-	int		err;
-	int		y;
+	int	dx;
+	int	dy;
+	int	err;
+	int	y;
 
 	dx = b.x - a.x;
 	dy = b.y - a.y;
 	y = a.y;
 	err = 2 * ft_abs(dy) - dx;
-
 	while (a.x <= b.x)
 	{
 		put_pixel_safe(data->img, a.x, y);
@@ -326,16 +340,15 @@ void	draw_line_low(t_data *data, t_point_render a, t_point_render b)
 
 void	draw_line_high(t_data *data, t_point_render a, t_point_render b)
 {
-	int		dx;
-	int		dy;
-	int		err;
-	int		x;
+	int	dx;
+	int	dy;
+	int	err;
+	int	x;
 
 	dx = b.x - a.x;
 	dy = b.y - a.y;
 	x = a.x;
 	err = 2 * ft_abs(dx) - dy;
-
 	while (a.y <= b.y)
 	{
 		put_pixel_safe(data->img, x, a.y);
@@ -367,7 +380,7 @@ void	draw_line(t_data *data, t_point_render start, t_point_render end)
 }
 void	call_line_drawing(t_data *data, int x, int y)
 {
-	t_map	*map;
+	t_map			*map;
 	t_point_render	p0;
 	t_point_render	p1;
 
@@ -386,8 +399,8 @@ void	call_line_drawing(t_data *data, int x, int y)
 }
 void	render_map(t_data *data)
 {
-	int x;
-	int y;
+	int	x;
+	int	y;
 
 	y = 0;
 	while (y < data->map->height)
@@ -400,7 +413,6 @@ void	render_map(t_data *data)
 		}
 		y++;
 	}
-
 }
 
 bool	init_all(t_data *data, char *filename)
@@ -409,25 +421,78 @@ bool	init_all(t_data *data, char *filename)
 	if (!data->map)
 		return (ft_putstr_fd("Memory allocation failed\n", 2), false);
 	init_camera(&data->camera);
-	if(!init_mlx(data))
+	if (!init_mlx(data))
 		return (false);
-	if(!init_map(data->map, filename, &data->camera))
+	if (!init_map(data->map, filename, &data->camera))
 		return (false);
-	if(!init_image(&data->img, data->mlx))
+	if (!init_image(&data->img, data->mlx))
 		return (false);
 	render_map(data);
 	return (true);
 }
+void	cleanup_data(t_data *data)
+{
+	if (data->img)
+		mlx_delete_image(data->mlx, data->img);
+	if (data->mlx)
+		mlx_terminate(data->mlx);
+	if (data->map)
+	{
+		free_points_in(data->map);
+		free_points_render(data->map);
+		free(data->map);
+	}
+}
+void	handle_key(mlx_key_data_t keydata, void *param)
+{
+	t_data	*data;
 
-int main(int ac, char **av)
+	data = (t_data *)param;
+	if (keydata.action != MLX_PRESS && keydata.action != MLX_REPEAT)
+		return ;
+	if (keydata.key == MLX_KEY_ESCAPE)
+		mlx_close_window(data->mlx);
+	else if (keydata.key == MLX_KEY_UP)
+		data->camera.offset_y -= 10;
+	else if (keydata.key == MLX_KEY_DOWN)
+		data->camera.offset_y += 10;
+	else if (keydata.key == MLX_KEY_LEFT)
+		data->camera.offset_x -= 10;
+	else if (keydata.key == MLX_KEY_RIGHT)
+		data->camera.offset_x += 10;
+	else if (keydata.key == MLX_KEY_KP_ADD || keydata.key == MLX_KEY_EQUAL)
+		data->camera.zoom *= 1.1;
+	else if (keydata.key == MLX_KEY_KP_SUBTRACT || keydata.key == MLX_KEY_MINUS)
+		data->camera.zoom *= 0.9;
+	else if (keydata.key == MLX_KEY_R)
+		init_camera(&data->camera);
+	calc_render_points(data->map, &data->camera);
+	mlx_delete_image(data->mlx, data->img);
+	init_image(&data->img, data->mlx);
+	render_map(data);
+}
+
+void	handle_close(void *param)
+{
+	t_data	*data;
+
+	data = (t_data *)param;
+	cleanup_data(data);
+	exit(0);
+}
+
+int	main(int ac, char **av)
 {
 	t_data	data;
 
+	ft_bzero(&data, sizeof(t_data));
 	if (ac != 2)
 		return (ft_putstr_fd("Usage ./fdf <location and name>\n", 2), 1);
-	if(!init_all(&data, av[1]))
+	if (!init_all(&data, av[1]))
 		return (ft_putstr_fd("Initialization failed\n", 2), 1);
+	mlx_key_hook(data.mlx, handle_key, &data);
+	mlx_close_hook(data.mlx, handle_close, &data);
 	mlx_loop(data.mlx);
-	mlx_terminate(data.mlx);
+	cleanup_data(&data);
 	return (0);
 }
