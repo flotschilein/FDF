@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/20 23:00:07 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/21 15:30:48 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,8 +208,8 @@ void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 	scaled_x = iso_x * cam->zoom + cam->offset_x;
 	scaled_y = iso_y * cam->zoom + cam->offset_y;
 
-	map->points_render[y][x].x = (int)scaled_x;
-	map->points_render[y][x].y = (int)scaled_y;
+	map->points_render[y][x].x = round(scaled_x);
+	map->points_render[y][x].y = round(scaled_y);
 }
 
 // void print_render_points(t_map *map)
@@ -264,12 +264,12 @@ bool	init_map(t_map *map, char *filename,t_camerainfo *cam)
 	return (true);
 }
 
-bool	init_mlx(mlx_t *mlx)
+bool	init_mlx(t_data *data)
 {
-	mlx = mlx_init(1000, 1000, "FDF", false);
-	if (!mlx)
-		return (false);
-	return (true);
+	data->mlx = mlx_init(1000, 1000, "FDF", false);
+    if (!data->mlx)
+        return false;
+    return true;
 }
 
 void	init_camera(t_camerainfo *camera)
@@ -278,6 +278,36 @@ void	init_camera(t_camerainfo *camera)
 	camera->offset_x = 0;
 	camera->offset_y = 0;
 }
+bool	init_image(mlx_image_t **img, mlx_t *mlx)
+{
+	*img = mlx_new_image(mlx, 1000, 1000);
+	if (!*img)
+		return (false);
+	mlx_image_to_window(mlx, *img, 0, 0);
+	return (true);
+}
+void	putting_pix_with_oppacity()
+
+void	call_line_drawing(t_data *data, int x, int y)
+{
+
+}
+void	render_map(t_data *data)
+{
+	int x;
+	int y;
+
+	while (y < data->map->height)
+	{
+		x = 0;
+		while (x < data->map->width)
+		{
+			call_line_drawing(data, x, y);
+			x++;
+		}
+		y++;
+	}
+}
 
 bool	init_all(t_data *data, char *filename)
 {
@@ -285,26 +315,23 @@ bool	init_all(t_data *data, char *filename)
 	if (!data->map)
 		return (ft_putstr_fd("Memory allocation failed\n", 2), false);
 	init_camera(&data->camera);
-	if(!init_mlx(data->mlx))
+	if(!init_mlx(data))
 		return (false);
 	if(!init_map(data->map, filename, &data->camera))
 		return (false);
 	if(!init_image(data->img, data->mlx))
 		return (false);
+	render_map(data);
 	return (true);
 }
 
-
 int main(int ac, char **av)
 {
-	t_data	*data;
+	t_data	data;
 
 	if (ac != 2)
 		return (ft_putstr_fd("Usage ./fdf <location and name>\n", 2), 1);
-	data = malloc(sizeof(t_data));
-	if (!data)
-		return (ft_putstr_fd("Memory allocation failed\n", 2), 1);
-	if(!init_all(data, av[1]))
+	if(!init_all(&data, av[1]))
 		return (ft_putstr_fd("Initialization failed\n", 2), free(data), 1);
 	return (0);
 }
