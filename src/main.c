@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/21 15:30:48 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/21 19:48:28 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,7 +274,7 @@ bool	init_mlx(t_data *data)
 
 void	init_camera(t_camerainfo *camera)
 {
-	camera->zoom = 100;
+	camera->zoom = 40;
 	camera->offset_x = 0;
 	camera->offset_y = 0;
 }
@@ -286,17 +286,110 @@ bool	init_image(mlx_image_t **img, mlx_t *mlx)
 	mlx_image_to_window(mlx, *img, 0, 0);
 	return (true);
 }
-void	putting_pix_with_oppacity()
 
+int    ft_abs(int value)
+{
+	if (value < 0)
+		return (-value);
+	return (value);
+}
+
+void	put_pixel_safe(mlx_image_t *img, int x, int y)
+{
+	if (x >= 0 && x < 1000 && y >= 0 && y < 1000)
+		mlx_put_pixel(img, x, y, 0xFFFFFFFF);
+}
+void	draw_line_low(t_data *data, t_point_render a, t_point_render b)
+{
+	int		dx;
+	int		dy;
+	int		err;
+	int		y;
+
+	dx = b.x - a.x;
+	dy = b.y - a.y;
+	y = a.y;
+	err = 2 * ft_abs(dy) - dx;
+
+	while (a.x <= b.x)
+	{
+		put_pixel_safe(data->img, a.x, y);
+		if (err > 0)
+		{
+			y += (dy > 0) ? 1 : -1;
+			err -= 2 * dx;
+		}
+		err += 2 * ft_abs(dy);
+		a.x++;
+	}
+}
+
+void	draw_line_high(t_data *data, t_point_render a, t_point_render b)
+{
+	int		dx;
+	int		dy;
+	int		err;
+	int		x;
+
+	dx = b.x - a.x;
+	dy = b.y - a.y;
+	x = a.x;
+	err = 2 * ft_abs(dx) - dy;
+
+	while (a.y <= b.y)
+	{
+		put_pixel_safe(data->img, x, a.y);
+		if (err > 0)
+		{
+			x += (dx > 0) ? 1 : -1;
+			err -= 2 * dy;
+		}
+		err += 2 * ft_abs(dx);
+		a.y++;
+	}
+}
+void	draw_line(t_data *data, t_point_render start, t_point_render end)
+{
+	if (ft_abs(end.y - start.y) < ft_abs(end.x - start.x))
+	{
+		if (start.x > end.x)
+			draw_line_low(data, end, start);
+		else
+			draw_line_low(data, start, end);
+	}
+	else
+	{
+		if (start.y > end.y)
+			draw_line_high(data, end, start);
+		else
+			draw_line_high(data, start, end);
+	}
+}
 void	call_line_drawing(t_data *data, int x, int y)
 {
+	t_map	*map;
+	t_point_render	p0;
+	t_point_render	p1;
 
+	map = data->map;
+	p0 = map->points_render[y][x];
+	if (x + 1 < map->width)
+	{
+		p1 = map->points_render[y][x + 1];
+		draw_line(data, p0, p1);
+	}
+	if (y + 1 < map->height)
+	{
+		p1 = map->points_render[y + 1][x];
+		draw_line(data, p0, p1);
+	}
 }
 void	render_map(t_data *data)
 {
 	int x;
 	int y;
 
+	y = 0;
 	while (y < data->map->height)
 	{
 		x = 0;
@@ -307,6 +400,7 @@ void	render_map(t_data *data)
 		}
 		y++;
 	}
+
 }
 
 bool	init_all(t_data *data, char *filename)
@@ -319,7 +413,7 @@ bool	init_all(t_data *data, char *filename)
 		return (false);
 	if(!init_map(data->map, filename, &data->camera))
 		return (false);
-	if(!init_image(data->img, data->mlx))
+	if(!init_image(&data->img, data->mlx))
 		return (false);
 	render_map(data);
 	return (true);
@@ -332,6 +426,8 @@ int main(int ac, char **av)
 	if (ac != 2)
 		return (ft_putstr_fd("Usage ./fdf <location and name>\n", 2), 1);
 	if(!init_all(&data, av[1]))
-		return (ft_putstr_fd("Initialization failed\n", 2), free(data), 1);
+		return (ft_putstr_fd("Initialization failed\n", 2), 1);
+	mlx_loop(data.mlx);
+	mlx_terminate(data.mlx);
 	return (0);
 }
