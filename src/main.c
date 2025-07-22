@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/21 20:23:54 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/22 14:09:54 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ bool	calc_map_size(int *width, int *height, char *filename)
 	}
 	return (close(fd), *width > 0 && *height > 0);
 }
+
 void	free_points_render(t_map *map)
 {
 	int	y;
@@ -234,7 +235,7 @@ void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 //         for (int x = 0; x < map->width; x++)
 //         {
 //             printf("(%4d, %4d) ", map->points_render[y][x].x,
-	map->points_render[y][x].y);
+	// map->points_render[y][x].y);
 //         }
 //         printf("\n");
 //     }
@@ -247,10 +248,7 @@ bool	calc_render_points(t_map *map, t_camerainfo *cam)
 	int	x;
 
 	if (!allocate_map_render(map, map->width, map->height))
-	{
-		free_points_in(map);
 		return (false);
-	}
 	y = 0;
 	while (y < map->height)
 	{
@@ -274,6 +272,7 @@ bool	init_map(t_map *map, char *filename, t_camerainfo *cam)
 	if (!calc_render_points(map, cam))
 	{
 		free_points_in(map);
+		free_points_render(map);
 		return (false);
 	}
 	return (true);
@@ -422,9 +421,10 @@ bool	init_all(t_data *data, char *filename)
 		return (ft_putstr_fd("Memory allocation failed\n", 2), false);
 	init_camera(&data->camera);
 	if (!init_mlx(data))
-		return (false);
+		return (free(data->map), false);
 	if (!init_map(data->map, filename, &data->camera))
-		return (false);
+		return (free(data->map), mlx_terminate(data->mlx),
+			ft_putstr_fd("Error initializing map\n", 2), false);
 	if (!init_image(&data->img, data->mlx))
 		return (false);
 	render_map(data);
@@ -460,12 +460,11 @@ void	handle_key(mlx_key_data_t keydata, void *param)
 		data->camera.offset_x -= 10;
 	else if (keydata.key == MLX_KEY_RIGHT)
 		data->camera.offset_x += 10;
-	else if (keydata.key == MLX_KEY_KP_ADD || keydata.key == MLX_KEY_EQUAL)
+	else if ((keydata.key == MLX_KEY_KP_ADD || keydata.key == MLX_KEY_EQUAL) && data->camera.zoom < 50)
 		data->camera.zoom *= 1.1;
-	else if (keydata.key == MLX_KEY_KP_SUBTRACT || keydata.key == MLX_KEY_MINUS)
+	else if ((keydata.key == MLX_KEY_KP_SUBTRACT || keydata.key == MLX_KEY_MINUS) && data->camera.zoom > 0.1)
 		data->camera.zoom *= 0.9;
-	else if (keydata.key == MLX_KEY_R)
-		init_camera(&data->camera);
+	free_points_render(data->map);
 	calc_render_points(data->map, &data->camera);
 	mlx_delete_image(data->mlx, data->img);
 	init_image(&data->img, data->mlx);
@@ -480,7 +479,12 @@ void	handle_close(void *param)
 	cleanup_data(data);
 	exit(0);
 }
-
+// void	leak_check(void)
+// {
+// 	system("leaks fdf"); // macOS only
+// 	// or just print marker for valgrind
+// 	printf("Exiting... check for leaks now\n");
+// }
 int	main(int ac, char **av)
 {
 	t_data	data;
@@ -494,5 +498,7 @@ int	main(int ac, char **av)
 	mlx_close_hook(data.mlx, handle_close, &data);
 	mlx_loop(data.mlx);
 	cleanup_data(&data);
+
 	return (0);
 }
+//atexit(leak_check); // macOS only
