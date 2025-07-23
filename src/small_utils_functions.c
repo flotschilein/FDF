@@ -6,11 +6,11 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 16:53:44 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:58:38 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 18:11:14 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../libft/libft.h"
+#include "../includes/fdf.h"
 
 bool	is_offscreen(t_point_render start, t_point_render end)
 {
