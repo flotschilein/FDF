@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 16:30:53 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:31:21 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 16:59:59 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,18 @@ void	free_points_in(t_map *map)
 	}
 	free(map->points_in);
 	map->points_in = NULL;
+}
+
+void	cleanup_data(t_data *data)
+{
+	if (data->img)
+		mlx_delete_image(data->mlx, data->img);
+	if (data->mlx)
+		mlx_terminate(data->mlx);
+	if (data->map)
+	{
+		free_points_in(data->map);
+		free_points_render(data->map);
+		free(data->map);
+	}
 }

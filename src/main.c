@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:54:38 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 16:59:51 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,19 +232,7 @@ void	render_map(t_data *data)
 	}
 }
 
-void	cleanup_data(t_data *data)
-{
-	if (data->img)
-		mlx_delete_image(data->mlx, data->img);
-	if (data->mlx)
-		mlx_terminate(data->mlx);
-	if (data->map)
-	{
-		free_points_in(data->map);
-		free_points_render(data->map);
-		free(data->map);
-	}
-}
+
 void	handle_key(mlx_key_data_t keydata, void *param)
 {
 	t_data	*data;
@@ -272,8 +260,6 @@ void	handle_key(mlx_key_data_t keydata, void *param)
 	init_image(&data->img, data->mlx);
 	render_map(data);
 }
-
-
 
 int	main(int ac, char **av)
 {
