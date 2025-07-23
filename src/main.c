@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:28:29 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 16:31:12 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,37 +42,6 @@ bool	calc_map_size(int *width, int *height, char *filename)
 		(*height)++;
 	}
 	return (close(fd), *width > 0 && *height > 0);
-}
-
-void	free_points_render(t_map *map)
-{
-	int	y;
-
-	if (!map->points_render)
-		return ;
-	y = 0;
-	while (y < map->height)
-	{
-		free(map->points_render[y]);
-		y++;
-	}
-	free(map->points_render);
-	map->points_render = NULL;
-}
-void	free_points_in(t_map *map)
-{
-	int	y;
-
-	if (!map->points_in)
-		return ;
-	y = 0;
-	while (y < map->height)
-	{
-		free(map->points_in[y]);
-		y++;
-	}
-	free(map->points_in);
-	map->points_in = NULL;
 }
 
 bool	allocate_map_render(t_map *map, int width, int height)
