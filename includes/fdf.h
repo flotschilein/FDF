@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:21:39 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 17:54:57 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 18:03:50 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,5 +85,16 @@ bool	fill_val(int fd, t_map *map);
 bool	fill_row(t_map *map, char **split, int y);
 bool	calc_map_size(int *width, int *height, char *filename);
 bool	help_calc_map_size(int fd, int *width, int *height);
+
+bool	calc_render_points(t_map *map, t_camerainfo *cam);
+void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam);
+
+void	render_map(t_data *data);
+void	call_line_drawing(t_data *data, int x, int y);
+void	draw_line(t_data *data, t_point_render start, t_point_render end);
+void	draw_line_high(t_data *data, t_point_render a, t_point_render b);
+void	draw_line_low(t_data *data, t_point_render a, t_point_render b);
+
+void	handle_key(mlx_key_data_t keydata, void *param);
 
 #endif
