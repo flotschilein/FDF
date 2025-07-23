@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:09:52 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 16:22:26 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,8 +316,16 @@ void	draw_line_high(t_data *data, t_point_render a, t_point_render b)
 		a.y++;
 	}
 }
+bool is_offscreen(t_point_render start, t_point_render end)
+{
+	return (start.x < 0 && end.x < 0) || (start.x >= 1000 && end.x >= 1000) ||
+			(start.y < 0 && end.y < 0) || (start.y >= 1000 && end.y >= 1000);
+}
+
 void	draw_line(t_data *data, t_point_render start, t_point_render end)
 {
+	if (is_offscreen(start, end))
+		return;
 	if (ft_abs(end.y - start.y) < ft_abs(end.x - start.x))
 	{
 		if (start.x > end.x)
