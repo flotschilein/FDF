@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:22:26 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 16:28:29 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,21 +182,6 @@ void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 	map->points_render[y][x].x = round(scaled_x);
 	map->points_render[y][x].y = round(scaled_y);
 }
-
-// void print_render_points(t_map *map)
-// {
-//     printf("\n--- Rendered Points (2D Isometric Projection) ---\n");
-//     for (int y = 0; y < map->height; y++)
-//     {
-//         for (int x = 0; x < map->width; x++)
-//         {
-//             printf("(%4d, %4d) ", map->points_render[y][x].x,
-	// map->points_render[y][x].y);
-//         }
-//         printf("\n");
-//     }
-//     printf("\n");
-// }
 
 bool	calc_render_points(t_map *map, t_camerainfo *cam)
 {
