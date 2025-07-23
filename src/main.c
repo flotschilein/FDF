@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/22 14:09:54 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/22 14:38:30 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -479,12 +479,7 @@ void	handle_close(void *param)
 	cleanup_data(data);
 	exit(0);
 }
-// void	leak_check(void)
-// {
-// 	system("leaks fdf"); // macOS only
-// 	// or just print marker for valgrind
-// 	printf("Exiting... check for leaks now\n");
-// }
+
 int	main(int ac, char **av)
 {
 	t_data	data;
@@ -501,4 +496,3 @@ int	main(int ac, char **av)
 
 	return (0);
 }
-//atexit(leak_check); // macOS only

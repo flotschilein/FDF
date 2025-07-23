@@ -6,7 +6,7 @@
 #    By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/03 13:50:27 by fbraune           #+#    #+#              #
-#    Updated: 2025/07/21 20:15:56 by fbraune          ###   ########.fr        #
+#    Updated: 2025/07/23 16:08:01 by fbraune          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,7 @@ MLX42_LIB = $(MLX42_DIR)build/libmlx42.a
 all: clone_mlx42 $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT) $(MLX42_LIB)
-	$(CC) $(CFLAGS) $(OBJ) leak/qInterceptor.o $(LIBFT) $(MLX42_LIB) -o $(NAME) -lglfw -framework Cocoa -framework OpenGL -framework IOKit
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(MLX42_LIB) -o $(NAME) -lglfw -framework Cocoa -framework OpenGL -framework IOKit
 
 $(LIBFT):
 	make -C $(LIBFT_DIR)
@@ -39,8 +39,12 @@ $(MLX42_LIB):
 	cmake --build $(MLX42_DIR)build
 
 clone_mlx42:
-	echo "Cloning MLX42 library..."; \
-	git clone $(MLX42_REPO) $(MLX42_DIR)
+	@if [ ! -d "$(MLX42_DIR).git" ]; then \
+		echo "Cloning MLX42 library..."; \
+		git clone $(MLX42_REPO) $(MLX42_DIR); \
+	else \
+		echo "MLX42 already cloned."; \
+	fi
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
