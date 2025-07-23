@@ -6,7 +6,7 @@
 #    By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/03 13:50:27 by fbraune           #+#    #+#              #
-#    Updated: 2025/07/23 16:33:49 by fbraune          ###   ########.fr        #
+#    Updated: 2025/07/23 16:43:23 by fbraune          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ MLX42_REPO = https://github.com/codam-coding-college/MLX42.git
 INCLUDES = -I include/ -I $(LIBFT_DIR) -I $(MLX42_DIR)include/
 
 SRC =	$(SRC_DIR)main.c \
-		$(SRC_DIR)free_functions.c
+		$(SRC_DIR)free_functions.c \
+		$(SRC_DIR)allocate_map.c
 
 OBJ = $(SRC:.c=.o)
 LIBFT = $(LIBFT_DIR)libft.a

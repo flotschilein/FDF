@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:21:39 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:32:48 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 16:41:15 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,5 +61,7 @@ typedef struct s_data
 void	free_points_in(t_map *map);
 void	free_points_render(t_map *map);
 
+bool	allocate_map_in(t_map *map, int width, int height);
+bool	allocate_map_render(t_map *map, int width, int height);
 
 #endif
