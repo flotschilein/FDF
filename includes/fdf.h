@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:21:39 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 17:00:24 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 17:54:57 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ void	free_points_in(t_map *map);
 void	free_points_render(t_map *map);
 void	cleanup_data(t_data *data);
 
-
 bool	allocate_map_in(t_map *map, int width, int height);
 bool	allocate_map_render(t_map *map, int width, int height);
 
@@ -76,5 +75,15 @@ void	handle_close(void *param);
 void	put_pixel_safe(mlx_image_t *img, int x, int y);
 int		ft_abs(int value);
 bool	is_offscreen(t_point_render start, t_point_render end);
+
+bool	read_map_points(t_map *map, char *filename);
+bool	fill_val(int fd, t_map *map);
+bool	calc_map_size(int *width, int *height, char *filename);
+
+bool	read_map_points(t_map *map, char *filename);
+bool	fill_val(int fd, t_map *map);
+bool	fill_row(t_map *map, char **split, int y);
+bool	calc_map_size(int *width, int *height, char *filename);
+bool	help_calc_map_size(int fd, int *width, int *height);
 
 #endif

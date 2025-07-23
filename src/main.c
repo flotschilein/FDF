@@ -6,89 +6,15 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:16:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:59:51 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/23 17:02:58 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-bool	calc_map_size(int *width, int *height, char *filename)
-{
-	int		fd;
-	char	*line;
-	char	**split;
 
-	*width = 0;
-	*height = 0;
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return (ft_putstr_fd("Error calc\n", 2), false);
-	while ((line = get_next_line(fd)) != NULL)
-	{
-		split = ft_split(line, ' ');
-		if (!split)
-			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line),
-				false);
-		if (ft_arr_len(split) == 0)
-			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line),
-				ft_free_split(split), false);
-		if (*width == 0)
-			*width = ft_arr_len(split);
-		else if (ft_arr_len(split) != *width)
-			return (close(fd), ft_putstr_fd("Error calc\n", 2), free(line),
-				ft_free_split(split), false);
-		free(line);
-		ft_free_split(split);
-		(*height)++;
-	}
-	return (close(fd), *width > 0 && *height > 0);
-}
 
-bool	fill_val(int fd, t_map *map)
-{
-	int		y;
-	int		x;
-	char	*line;
-	char	**split;
 
-	y = 0;
-	while ((line = get_next_line(fd)) != NULL && y < map->height)
-	{
-		split = ft_split(line, ' ');
-		if (!split)
-			return (free(line), ft_putstr_fd("Error read\n", 2), false);
-		x = 0;
-		while (split[x] && x < map->width)
-		{
-			map->points_in[y][x].x = x;
-			map->points_in[y][x].y = y;
-			map->points_in[y][x].z = ft_atoi(split[x]);
-			x++;
-		}
-		free(line);
-		ft_free_split(split);
-		y++;
-	}
-	return (y == map->height);
-}
-
-bool	read_map_points(t_map *map, char *filename)
-{
-	int	fd;
-
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return (ft_putstr_fd("Error read\n", 2), false);
-	if (!allocate_map_in(map, map->width, map->height))
-		return (close(fd), ft_putstr_fd("Error read\n", 2), false);
-	if (!fill_val(fd, map))
-	{
-		free_points_in(map);
-		return (close(fd), ft_putstr_fd("Error read\n", 2), false);
-	}
-	close(fd);
-	return (true);
-}
 
 void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 {

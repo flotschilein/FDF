@@ -6,7 +6,7 @@
 #    By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/03 13:50:27 by fbraune           #+#    #+#              #
-#    Updated: 2025/07/23 16:56:28 by fbraune          ###   ########.fr        #
+#    Updated: 2025/07/23 17:03:59 by fbraune          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,8 @@ SRC =	$(SRC_DIR)main.c \
 		$(SRC_DIR)free_functions.c \
 		$(SRC_DIR)allocate_functions.c \
 		$(SRC_DIR)init_functions.c \
-		$(SRC_DIR)small_utils_functions.c
+		$(SRC_DIR)small_utils_functions.c \
+		$(SRC_DIR)calc_size_fill_points.c
 
 OBJ = $(SRC:.c=.o)
 LIBFT = $(LIBFT_DIR)libft.a
