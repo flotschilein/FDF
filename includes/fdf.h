@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:21:39 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 18:03:50 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/24 14:40:43 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,44 +57,31 @@ typedef struct s_data
 	t_camerainfo	camera;
 	mlx_image_t		*img;
 }					t_data;
+bool	allocate_map_in(t_map *map, int width, int height);
+bool	allocate_map_render(t_map *map, int width, int height);
+
+bool	read_map_points(t_map *map, char *filename);
+bool	calc_map_size(int *width, int *height, char *filename);
 
 void	free_points_in(t_map *map);
 void	free_points_render(t_map *map);
 void	cleanup_data(t_data *data);
 
-bool	allocate_map_in(t_map *map, int width, int height);
-bool	allocate_map_render(t_map *map, int width, int height);
-
 bool	init_all(t_data *data, char *filename);
 bool	init_image(mlx_image_t **img, mlx_t *mlx);
-void	init_camera(t_camerainfo *camera);
-bool	init_mlx(t_data *data);
-bool	init_map(t_map *map, char *filename, t_camerainfo *cam);
+
+int		main(int ac, char **av);
+
+bool	calc_render_points(t_map *map, t_camerainfo *cam);
+
+void	handle_key(mlx_key_data_t keydata, void *param);
+
+
+void	render_map(t_data *data);
 
 void	handle_close(void *param);
 void	put_pixel_safe(mlx_image_t *img, int x, int y);
 int		ft_abs(int value);
 bool	is_offscreen(t_point_render start, t_point_render end);
-
-bool	read_map_points(t_map *map, char *filename);
-bool	fill_val(int fd, t_map *map);
-bool	calc_map_size(int *width, int *height, char *filename);
-
-bool	read_map_points(t_map *map, char *filename);
-bool	fill_val(int fd, t_map *map);
-bool	fill_row(t_map *map, char **split, int y);
-bool	calc_map_size(int *width, int *height, char *filename);
-bool	help_calc_map_size(int fd, int *width, int *height);
-
-bool	calc_render_points(t_map *map, t_camerainfo *cam);
-void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam);
-
-void	render_map(t_data *data);
-void	call_line_drawing(t_data *data, int x, int y);
-void	draw_line(t_data *data, t_point_render start, t_point_render end);
-void	draw_line_high(t_data *data, t_point_render a, t_point_render b);
-void	draw_line_low(t_data *data, t_point_render a, t_point_render b);
-
-void	handle_key(mlx_key_data_t keydata, void *param);
 
 #endif

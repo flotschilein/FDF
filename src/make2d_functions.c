@@ -6,13 +6,13 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 17:56:13 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 17:56:39 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/24 14:33:42 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
+static void	project_to_2d(t_map *map, int x, int y, t_camerainfo *cam)
 {
 	double	angle;
 	double	iso_x;

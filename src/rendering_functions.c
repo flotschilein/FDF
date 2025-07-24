@@ -6,13 +6,13 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 17:57:23 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 18:00:32 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/24 14:39:39 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-void	draw_line_low(t_data *data, t_point_render a, t_point_render b)
+static void	draw_line_low(t_data *data, t_point_render a, t_point_render b)
 {
 	int	dx;
 	int	dy;
@@ -39,7 +39,7 @@ void	draw_line_low(t_data *data, t_point_render a, t_point_render b)
 	}
 }
 
-void	draw_line_high(t_data *data, t_point_render a, t_point_render b)
+static void	draw_line_high(t_data *data, t_point_render a, t_point_render b)
 {
 	int	dx;
 	int	dy;
@@ -66,7 +66,7 @@ void	draw_line_high(t_data *data, t_point_render a, t_point_render b)
 	}
 }
 
-void	draw_line(t_data *data, t_point_render start, t_point_render end)
+static void	draw_line(t_data *data, t_point_render start, t_point_render end)
 {
 	if (is_offscreen(start, end))
 		return ;
@@ -86,7 +86,7 @@ void	draw_line(t_data *data, t_point_render start, t_point_render end)
 	}
 }
 
-void	call_line_drawing(t_data *data, int x, int y)
+static void	call_line_drawing(t_data *data, int x, int y)
 {
 	t_map			*map;
 	t_point_render	p0;

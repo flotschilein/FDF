@@ -6,7 +6,7 @@
 #    By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/03 13:50:27 by fbraune           #+#    #+#              #
-#    Updated: 2025/07/23 18:10:53 by fbraune          ###   ########.fr        #
+#    Updated: 2025/07/24 14:22:36 by fbraune          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,10 +34,19 @@ OBJ = $(SRC:.c=.o)
 LIBFT = $(LIBFT_DIR)libft.a
 MLX42_LIB = $(MLX42_DIR)build/libmlx42.a
 
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+	LIBS = -lglfw -framework Cocoa -framework OpenGL -framework IOKit
+endif
+ifeq ($(UNAME_S),Linux)
+	LIBS = -lglfw -lGL -ldl -lm -lpthread
+endif
+
 all: clone_mlx42 $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT) $(MLX42_LIB)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(MLX42_LIB) -o $(NAME) -lglfw -framework Cocoa -framework OpenGL -framework IOKit
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(MLX42_LIB) -o $(NAME) $(LIBS)
 
 $(LIBFT):
 	make -C $(LIBFT_DIR)

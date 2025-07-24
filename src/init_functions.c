@@ -6,13 +6,13 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 16:47:16 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 16:57:45 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/24 14:32:15 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-bool	init_map(t_map *map, char *filename, t_camerainfo *cam)
+static bool	init_map(t_map *map, char *filename, t_camerainfo *cam)
 {
 	if (!calc_map_size(&map->width, &map->height, filename))
 		return (false);
@@ -27,7 +27,7 @@ bool	init_map(t_map *map, char *filename, t_camerainfo *cam)
 	return (true);
 }
 
-bool	init_mlx(t_data *data)
+static bool	init_mlx(t_data *data)
 {
 	data->mlx = mlx_init(1000, 1000, "FDF", false);
 	if (!data->mlx)
@@ -35,7 +35,7 @@ bool	init_mlx(t_data *data)
 	return (true);
 }
 
-void	init_camera(t_camerainfo *camera)
+static void	init_camera(t_camerainfo *camera)
 {
 	camera->zoom = 1;
 	camera->offset_x = 500;

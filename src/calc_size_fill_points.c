@@ -6,13 +6,13 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 17:02:41 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/23 17:52:50 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/24 14:29:35 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-bool	help_calc_map_size(int fd, int *width, int *height)
+static bool	help_calc_map_size(int fd, int *width, int *height)
 {
 	char	*line;
 	char	**split;
@@ -56,7 +56,7 @@ bool	calc_map_size(int *width, int *height, char *filename)
 	return (*width > 0 && *height > 0);
 }
 
-bool	fill_row(t_map *map, char **split, int y)
+static bool	fill_row(t_map *map, char **split, int y)
 {
 	int	x;
 
@@ -71,7 +71,7 @@ bool	fill_row(t_map *map, char **split, int y)
 	return (true);
 }
 
-bool	fill_val(int fd, t_map *map)
+static bool	fill_val(int fd, t_map *map)
 {
 	int		y;
 	char	*line;
