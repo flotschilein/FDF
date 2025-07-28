@@ -6,7 +6,7 @@
 /*   By: fbraune <fbraune@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/03 12:21:39 by fbraune           #+#    #+#             */
-/*   Updated: 2025/07/24 14:40:43 by fbraune          ###   ########.fr       */
+/*   Updated: 2025/07/24 16:50:54 by fbraune          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,6 @@ int		main(int ac, char **av);
 bool	calc_render_points(t_map *map, t_camerainfo *cam);
 
 void	handle_key(mlx_key_data_t keydata, void *param);
-
 
 void	render_map(t_data *data);
 
